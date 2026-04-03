@@ -40,9 +40,8 @@ btnGuardarManual.addEventListener('click', function(){
         return;
     }
     //agregamos a la lista
-    listaJuegos.push({nombre, anio, imagen, estado: "Pendiente"});
-    mostrarLista();
-
+    agregarJuegosALaLista({nombre, anio, imagen, estado: "Pendiente"});
+    
     //cerramos el modal
     modalAgregarJuego.hide();
 });
