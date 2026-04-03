@@ -1,0 +1,17 @@
+[
+    {
+        "nombre": "Red Dead Redemption 2",
+        "anio": 2018,
+        "imagen": "assets/img/rdr2.ico"
+    },
+    {
+        "nombre": "GTA V",
+        "anio": 2013,
+        "imagen": "assets/img/gtaV.png"
+    },
+    {
+        "nombre": "The Last Of Us Part II",
+        "anio": 2020,
+        "imagen": "assets/img/tlou2.png"
+    }
+]

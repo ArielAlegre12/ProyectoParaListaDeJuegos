@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es-ES">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Home</title>
+    <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+
+<body class="bg-dark text-light">
+    <header></header>
+    <main class="container pt-0 pb-5">
+        <div class="mx-auto" style="max-width: 100%;">
+            <h1 class="text-center mb-4">Check List Juegos</h1>
+            <p class="lead mb-5">
+                <font dir="auto" style="vertical-align: inherit;">
+                    <font dir="auto" style="vertical-align: inherit;">
+                        ¡Bienvenido! Aquí podrás llevar en siguimiento una lista de tus juegos preferidos y así nunca
+                        olvidar jugarlo!.
+                    </font>
+                </font>
+            </p>
+            <!--formulario-->
+            <form id="miFormu" class="d-flex gap-2 mb-3">
+                <input id="entradaJuego" type="text" placeholder="escribe el juego" name="busqueda">
+                <button type="submit" class="btn btn-primary">agregar</button>
+            </form>
+            <!--los resultados-->
+            <div id="resultadosBusqueda" class="row g-3"></div>
+            <h3 class="mt-3">Lista de Juegos</h3>
+            <div id="listGames" class="row g-3">
+            </div>
+        </div>
+    </main>
+    <button id="btnBuscar" class="btn-buscar">
+        🔍
+    </button>
+    <footer></footer>
+
+    <script src="js/main.js"></script>
+    <script src="js/bootstrap/js/bootstrap.bundle.min.js"></script>
+</body>
+
+</html>
