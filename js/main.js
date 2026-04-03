@@ -40,7 +40,17 @@ btnGuardarManual.addEventListener('click', function(){
         return;
     }
     //agregamos a la lista
-    agregarJuegosALaLista({nombre, anio, imagen, estado: "Pendiente"});
+    agregarJuegosALaLista({nombre, anio, imagen});
+
+    //agregamos al catálogo en caso de que no exista
+    if(!catalogoJuegos.some(j => j.nombre.toLowerCase() === nombre.toLowerCase())){
+        const nuevoJuego = {nombre, anio, imagen};
+        catalogoJuegos.push(nuevoJuego);
+
+        //guardar en el localStorage(solo los manuales)
+        const catalogoGuardado = JSON.parse(localStorage.getItem("catalogoJuegos")) || [];
+        catalogoGuardado.setItem("catalogoJuegos", JSON.stringify(catalogoGuardado));
+    }
     
     //cerramos el modal
     modalAgregarJuego.hide();
@@ -122,12 +132,19 @@ entradaJuego.addEventListener('input', function(){
 
 
 async function cargarCatalogo() {
-    try {
+    try{
         const respuesta = await fetch('data/catalogo.json');
-        catalogoJuegos = await respuesta.json();
+        const catalogoBase = await respuesta.json();
+
+        //cargar los juegos manuales guardados
+        const catalogoGuardado = JSON.parse(localStorage.getItem("catalogoJuegos")) || [];
+
+        //unir ambos catálogos
+        catalogoJuegos = [...catalogoBase, ...catalogoGuardado];
+
         console.log(catalogoJuegos);
-    } catch (error) {
-        console.log("Error al cargar el catálogo:", error);
+    }catch(error){
+        console.log("Error al cargar el catálogo: ", error);
     }
 }
 cargarCatalogo();
