@@ -1,3 +1,4 @@
+document.addEventListener('DOMContentLoaded', function(){
 //seleciono el formulario
 const botonBuscador = document.querySelector('#miFormu');//id del boton
 const entradaJuego = document.querySelector('#entradaJuego');
@@ -6,6 +7,45 @@ const resultadoBusqueda = document.getElementById("resultadosBusqueda");
 const listaJuegos = [];
 let catalogoJuegos = [];
 let indiceSeleccionado = -1;
+//modal y sus campos
+const modalAgregarJuego = new bootstrap.Modal(document.getElementById('modalAgregarJuego'));
+const nombreManual =  document.getElementById('nombreManual');
+const anioManual = document.getElementById('anioManual');
+const imagenManual = document.getElementById('imagenManual');
+const btnGuardarManual = document.getElementById('guardarManual');
+const btnAgregarManual = document.getElementById('btnAgregarManual');
+
+//abrir el modal al hacer click
+btnAgregarManual.addEventListener('click', function(){
+    //limpio los campos
+    nombreManual.value = '';
+    anioManual.value = '';
+    imagenManual.value = '';
+    modalAgregarJuego.show();
+});
+
+//btn que guarda el juego manualmente
+btnGuardarManual.addEventListener('click', function(){
+    const nombre = nombreManual.value.trim();
+    const anio = parseInt(anioManual.value);
+    const imagen = imagenManual.value.trim();
+
+    if(!nombre || !anio || !imagen){
+        alert("Completa todos los campos");
+        return;
+    }
+    //chequea si ya existe la lista
+    if(listaJuegos.some(j => j.nombre.toLowerCase() == nombre.toLowerCase())){
+        alert("Este juego ya está en tu lista!");
+        return;
+    }
+    //agregamos a la lista
+    listaJuegos.push({nombre, anio, imagen, estado: "Pendiente"});
+    mostrarLista();
+
+    //cerramos el modal
+    modalAgregarJuego.hide();
+});
 
 //intentar cargar lista guardad en localStorage
 const juegosGuardados = localStorage.getItem("misJuegos");
@@ -204,4 +244,6 @@ window.addEventListener("scroll", function(){
     }else{
         btnBuscar.style.display = "none";
     }
+});
+
 });
