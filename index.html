@@ -25,7 +25,7 @@
             <!--formulario-->
             <form id="miFormu" class="d-flex gap-2 mb-3">
                 <input id="entradaJuego" type="text" placeholder="escribe el juego" name="busqueda">
-                <button type="submit" class="btn btn-primary">agregar</button>
+                <button type="button" class="btn btn-primary" id="btnAgregarManual">agregar</button>
             </form>
             <!--los resultados-->
             <div id="resultadosBusqueda" class="row g-3"></div>
@@ -39,8 +39,39 @@
     </button>
     <footer></footer>
 
-    <script src="js/main.js"></script>
+    <!--modelo para agregar juegos manualmente-->
+    <div class="modal fade" id="modalAgregarJuego" tabindex="-1" aria-labelledby="modalAgregarJuegoLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalAgregarJuegoLabel">Agregar Juego Manualmente</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formAgregarManual">
+                        <div class="mb-3">
+                            <label for="nombreManual" class="form-label">Nombre</label>
+                            <input type="text" class="form-control" id="nombreManual" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="anioManual" class="form-label">Año</label>
+                            <input type="number" class="form-control" id="anioManual" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="imagenManual" class="form-label">Imagen(URL)</label>
+                            <input type="text" class="form-control" id="imagenManual" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="guardarManual">Guardar</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="js/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="js/main.js"></script>
 </body>
 
 </html>
