@@ -18,6 +18,33 @@ document.addEventListener('DOMContentLoaded', function () {
     const imagenManual = document.getElementById('imagenManual');
     const btnGuardarManual = document.getElementById('guardarManual');
     const btnAgregarManual = document.getElementById('btnAgregarManual');
+    const btnBuscar = document.getElementById("btnBuscar");
+    const input = document.getElementById("entradaJuego");
+    const titulo = document.getElementById("titulo");
+
+    //función para reinciar el titulo
+    function reinciaAnimacion(){
+        titulo.classList.remove("titulo-gamer");
+        //forzar el reflow
+        void titulo.offsetWidth;
+
+        titulo.classList.add("titulo-gamer")
+    }
+    setInterval(reinciaAnimacion, 5000);//repite en bucle
+
+    //función para evitar que la lupa de busqueda aplaste el footer jei
+    window.addEventListener("scroll", function(){
+        const footerRect = footer.getBoundingClientRect();
+        const windowHeight = window.innerHeight;
+
+        if(footerRect.top < windowHeight){
+            //está tocando el footer?si, subir la lupa
+            btnBuscar.style.bottom = (windowHeight - footerRect.top + 20) + "px";
+        }else{
+            //pos. normal
+            btnBuscar.style.bottom = "20px";
+        }
+    })
 
     //funciones helper para agregar manualmente
     function mostrarMensajeModal(texto) {
@@ -30,10 +57,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
         clearTimeout(timeoutModal);
 
-        timeoutModal = setTimeout(()=>{
+        timeoutModal = setTimeout(() => {
             mensajeModal.style.opacity = "0";
 
-            setTimeout(()=>{
+            setTimeout(() => {
                 mensajeModal.style.display = "none";
             }, 110);
         }, 1000);
@@ -42,7 +69,7 @@ document.addEventListener('DOMContentLoaded', function () {
         mensajeModal.style.display = "none";
     }
 
-    function mostrarMensaje(texto){
+    function mostrarMensaje(texto) {
         mensajeForm.textContent = texto;
         mensajeForm.style.display = "block";
 
@@ -52,16 +79,16 @@ document.addEventListener('DOMContentLoaded', function () {
 
         clearTimeout(timeoutForm);
 
-        timeoutForm = setTimeout(()=>{
+        timeoutForm = setTimeout(() => {
             mensajeForm.style.opacity = "0";
 
             //termina el fade y lo ocultamos
-            setTimeout(()=>{
+            setTimeout(() => {
                 mensajeForm.style.display = "none";
             }, 110);
         }, 1000);
     }
-    function ocultarMensaje(){
+    function ocultarMensaje() {
         mensajeForm.style.display = "none";
     }
 
@@ -323,9 +350,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     //scrollear al buscador
-    const btnBuscar = document.getElementById("btnBuscar");
-    const input = document.getElementById("entradaJuego");
-
     btnBuscar.addEventListener("click", function () {
         input.scrollIntoView({ behavior: "smooth" });
         input.focus();
@@ -339,4 +363,16 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 
+    //cerrar el nav al hacer click en alguna opcion
+    document.querySelectorAll('.navbar .nav-link').forEach(link => {
+        link.addEventListener('click', function () {
+            const navbar = document.querySelector('.navbar-collapse');
+            const bsCollapse = new bootstrap.Collapse(navbar, {
+                toggle: false
+            });
+            bsCollapse.hide();
+        });
+    });
+
 });
+

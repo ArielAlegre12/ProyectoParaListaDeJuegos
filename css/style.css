@@ -1,3 +1,33 @@
+
+body {
+    background: linear-gradient(-45deg, #222020, #97368f, #4d4ca1, #7e1111);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+    padding-top: 70px;
+}
+
+html{
+    scroll-behavior: smooth;
+}
+
+@keyframes gradientBG {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+.navbar {
+    background: linear-gradient(-45deg, #0f0f0f, #1a1a1a, #0d6efd, #000000);
+    background-size: 400% 400%;
+    animation: gradientBG 10s ease infinite;
+}
+/*evitar que el nav tape los juegos*/
+#listGames{
+    scroll-margin-top: 80px;
+}
+#faqs{
+    scroll-margin-top: 80px;
+}
+
 /*card de la imagen*/
 .card-img-top{
     height: 180px;
@@ -5,6 +35,17 @@
     object-fit: cover;
     border-bottom: 1px solid #444;
 }
+
+.card{
+    transition: all 0.3s ease;
+    background-color: #1a1a1a;
+    border: none;
+}
+.card:hover{
+    transform: scale(1.05);
+    box-shadow: 0 0 15px rgba(13, 110, 253, 0.5)
+}
+
 /**display del botón buscar**/
 #btnBuscar{
     display: none;
@@ -21,7 +62,7 @@
 
     font-size: 22px;
 
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(0, 0, 0, 0.1);
     backdrop-filter: blur(10px);
     -webkit-backdrop-filter: blur(10px);
     
@@ -33,6 +74,8 @@
 
     cursor: pointer;
     transition: all 0.3s ease;
+
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
 }
 
 #btnBuscar:hover{
@@ -40,11 +83,77 @@
     background: rgba(255, 255, 255, 0.2);
 }
 
-#btnBuscar{
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.4);
+/*efectos para el btn de agregar*/
+.resultado.resaltado{
+    background-color: #2d2f33;
+    color: white;
 }
 
-.resultado.resaltado{
-    background-color: #0d6efd;
+#btnAgregarManual {
+    transition: all 0.3s ease;
+}
+
+#btnAgregarManual:hover {
+    transform: scale(1.05);
+}
+
+#btnAgregarManual:active {
+    transform: scale(0.95);
+}
+
+.titulo-gamer span{
+    display: inline-block;
+    opacity: 0;
+    transform: translateY(-50px) scale(0.5);
+    animation: aparecer 0.5s forwards;
+}
+
+/*delay progresivo jeje*/
+.titulo-gamer span:nth-child(1){animation-delay: 0.1s;}
+.titulo-gamer span:nth-child(2){animation-delay: 0.2s;}
+.titulo-gamer span:nth-child(3){animation-delay: 0.3s;}
+.titulo-gamer span:nth-child(4){animation-delay: 0.4s;}
+.titulo-gamer span:nth-child(5){animation-delay: 0.5s;}
+.titulo-gamer span:nth-child(6){animation-delay: 0.6s;}
+.titulo-gamer span:nth-child(7){animation-delay: 0.7s;}
+.titulo-gamer span:nth-child(8){animation-delay: 0.8s;}
+.titulo-gamer span:nth-child(9){animation-delay: 0.9s;}
+
+@keyframes aparecer{
+    to{
+        opacity: 1;
+        transform: translateY(0) scale(1);
+    }
+}
+
+/*glitch suave*/
+.titulo-gamer{
     color: white;
+    position: relative;
+    animation: glitch 2s infinite;
+    text-shadow: 0 0 5px #0d6efd;
+}
+@keyframes glitch{
+    0% {transform: translate(0);}
+    20% {transform: translate(-1px, -1px);}
+    40% {transform: translate(1px, -1px);}
+    60% {transform: translate(-1px, 0);}
+    80% {transform: translate(1px, 1px);}
+    100% {transform: translate(0);}
+
+}
+
+/*decoración para el footer*/
+.footer{
+    background-color: #121212;
+    color: white;
+    border-top: 1px solid rgba(255,255,255,0.1);
+}
+.footer a{
+    color: #0d6efd;
+    transition: color 0.3s;
+}
+.footer a:hover{
+    color: #66b2ff;
+    text-shadow: 0 0 5px #0d6efd;
 }

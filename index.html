@@ -4,28 +4,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Check List Juegos</title>
+    <title>Vago Zone</title>
     <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="css/style.css">
 </head>
 
-<body class="bg-dark text-light">
-    <header></header>
+<body>
+    <header>
+        <nav class="navbar navbar-expand-lg bg-body-tertiary fixed-top">
+            <div class="container-fluid">
+                <a href="/" class="navbar-brand">Vago Zone</a>
+                <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                    data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent"
+                    aria-expanded="false" aria-label="Toggle navigation">
+                    <span class="navbar-toggler-icon"></span>
+                </button>
+                <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" aria-current="page">Inicio</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#listGames" class="nav-link active" aria-current="page">Juegos</a>
+                        </li>
+                        <li class="nav-item">
+                            <a href="#faqs" class="nav-link active" aria-current="page">FaQ</a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </nav>
+    </header>
     <main class="container pt-0 pb-5">
         <div class="mx-auto" style="max-width: 100%;">
-            <h1 class="text-center mb-4">Check List Juegos</h1>
-            <p class="lead mb-5">
-                ¡Bienvenido! Aquí podrás llevar en siguimiento una lista de tus juegos preferidos y así nunca
-                olvidar jugarlos!. <br><br>
-                Para agregar un juego manualmente deberás ingresar el nombre, el año del juego, y una url de la img de
-                tu juego. <br><br>
-                una vez agregado, <strong>!queda guardado de manera local!</strong>, asi que aunque lo elimines de tu
-                lista, lo podrás volver a
-                agregar buscandoló.
+            <h1 id="titulo" class="titulo-gamer">
+                <span>V</span>
+                <span>a</span>
+                <span>g</span>
+                <span>o</span>
+                <span> </span>
+                <span>Z</span>
+                <span>o</span>
+                <span>n</span>
+                <span>e</span>
+            </h1>
+            <p class="text-center text-secondary">
+                Acá guardás los juegos que muy probablemente nunca los termines &gt;&lt;
             </p>
+            <div>
+
+            </div>
             <!--formulario-->
             <form id="miFormu" class="d-flex gap-2 mb-3">
-                <input id="entradaJuego" type="text" placeholder="escribe el juego" name="busqueda">
+                <input id="entradaJuego" type="text" placeholder="escribe el juego" name="busqueda" autocomplete="off">
                 <button type="button" class="btn btn-primary" id="btnAgregarManual">agregar</button>
             </form>
 
@@ -33,15 +64,44 @@
 
             <!--los resultados-->
             <div id="resultadosBusqueda" class="row g-3"></div>
-            <h3 class="mt-3">Lista de Juegos</h3>
+            <h3 class="mt-3">Lista de mis juegos</h3>
             <div id="listGames" class="row g-3">
             </div>
         </div>
+        <section id="faqs">
+            <div class="mt-5 py-4">
+                <details>
+                    <summary>¿Cómo agrego un juego?</summary>
+                    <p>Completá el formulario y listo.</p>
+                </details>
+                <details>
+                    <summary>¿Se guardan mis datos?</summary>
+                    <p>Si, pero de manera <strong>local</strong>.</p>
+                </details>
+            </div>
+        </section>
     </main>
     <button id="btnBuscar" class="btn-buscar">
         🔍
     </button>
-    <footer></footer>
+    <footer id="footer" class="footer mt-5 py-4 text-center">
+        <div class="container">
+            <h5 class="mb-3">Vago Zone</h5>
+            <p class="mb-2">
+                Organizá tus juegos y no te olvides jugarlos.
+            </p>
+            <div class="mb-3">
+                <a href="#listGames" class="me-3 text-decoration-none">Juegos</a>
+                <a href="#faqs" class=" me-3 text-decoration-none">FAQ</a>
+                <a href="https://github.com/ArielAlegre12" target="_blank" class=" me-3 text-decoration-none">GitHub</a>
+                <a href="https://instagram.com/alegreariel666" target="_blank" class="me-3 text-decoration-none">Instagram</a>
+            </div>
+            <small>
+                © 2026 - Hecho por ariel.
+            </small>
+        </div>
+
+    </footer>
 
     <!--modelo para agregar juegos manualmente-->
     <div class="modal fade" id="modalAgregarJuego" tabindex="-1" aria-labelledby="modalAgregarJuegoLabel"
