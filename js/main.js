@@ -197,20 +197,25 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     //registro
     btnRegister.addEventListener("click", async()=>{
+        btnRegister.disabled = true;
         const{data, error} = await supabase.auth.signUp({
             email: loginEmail.value,
             password: loginPassword.value
         });
         if(error){
             mostrarMensajeLogin(error.message);
+            if(error.status === 429){
+                mostrarMensajeLogin("Demasiados intentos. Esperá unos segundos.");
+            }
         }else{
             mostrarMensajeLogin("Usuario creado! Revisa tu correo para confirmar.");
         }
+        setTimeout(()=> btnRegister.disabled = false, 52000);
     });
 
     //login
     btnLogin.addEventListener("click", async()=>{
-        const{data, error} = await supabase.auth.signInWithPassowrd({
+        const{data, error} = await supabase.auth.signInWithPassword({
             email: loginEmail.value,
             password: loginPassword.value
         });
