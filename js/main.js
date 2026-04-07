@@ -63,6 +63,11 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    //funcion sincronizar localmente
+    function guardarEnLocalStorage(){
+        localStorage.setItem("mis_juegos_cache", JSON.stringify(listaJuegos));
+    }
+
     //función para borrar los juegos de la db
     async function eliminarJuegosDeDB(nombreJuego){
         const{data: userData, error: userError} = await supabase.auth.getUser();
@@ -134,6 +139,7 @@ document.addEventListener('DOMContentLoaded', function () {
         };
         //agregamos a la lista actual
         listaJuegos.push(nuevoJuego);
+        guardarEnLocalStorage();
         //agregamos al catalogo de sugerencias
         const enCatalogo = catalogoJuegos.some(j=>j.nombre.toLowerCase().trim() === nombreNormalizado);
         if(!enCatalogo){
@@ -310,6 +316,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         document.getElementById("btnLogout").addEventListener("click", async () => {
             await supabase.auth.signOut();
+            localStorage.removeItem("mis_juegos_cache");
             //limpiamos listas y DOM
             listaJuegos.length = 0;
             catalogoJuegos.length = 0;
@@ -441,13 +448,19 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     async function init() {
         await cargarCatalogo();
+        //carga instantanea
+        const cache = localStorage.getItem("mis_juegos_cache");
+        if(cache){
+            listaJuegos.length = 0;
+            listaJuegos.push(...JSON.parse(cache));
+            mostrarLista();
+        }
         const { data, error } = await supabase.auth.getUser();
-        if(error) return console.log("Error al obtener usuario:", error);
+        if(error) return;
         const user = data.user;
         if (user) {
             mostrarMenuUsuario(user);
             await cargarCatalogo();
-            console.log("Usuario al recargar:", user);
             await cargarDesdeBD();
         }
     }
@@ -521,6 +534,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     await eliminarJuegosDeDB(element.nombre);
                     listaJuegos.splice(index,1);
                     mostrarLista();
+                    guardarEnLocalStorage();
                 }catch(err){
                     alert("No se pudo eliminar el juego. Revisa tu conexión.");
                 }
@@ -536,6 +550,9 @@ document.addEventListener('DOMContentLoaded', function () {
                     "En proceso": "Pendiente"
                 }
                 element.estado = estados[element.estado] || "Pendiente";
+                mostrarLista();
+                guardarEnLocalStorage();
+                await actualizarEstadoJuegoEnDB(element);
 
                 try{
                     await actualizarEstadoJuegoEnDB(element);
