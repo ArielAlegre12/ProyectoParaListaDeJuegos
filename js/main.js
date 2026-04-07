@@ -21,6 +21,9 @@ document.addEventListener('DOMContentLoaded', function () {
     const btnBuscar = document.getElementById("btnBuscar");
     const input = document.getElementById("entradaJuego");
     const titulo = document.getElementById("titulo");
+    const navbar = document.querySelector('.navbar');
+    const collapse = document.getElementById("navbarSupportedContent");
+    
 
     //función para reinciar el titulo
     function reinciaAnimacion(){
@@ -45,6 +48,18 @@ document.addEventListener('DOMContentLoaded', function () {
             btnBuscar.style.bottom = "20px";
         }
     })
+
+    //cerrar menu al hacer click afuera(para moviles)
+    document.addEventListener('click', function(event){
+        const clickAdentro = navbar.contains(event.target);
+
+        if(!clickAdentro  && collapse.classList.contains('show')){
+            const bsCollapse = new bootstrap.Collapse(collapse, {
+                toggle: false
+            });
+            bsCollapse.hide();
+        }
+    });
 
     //funciones helper para agregar manualmente
     function mostrarMensajeModal(texto) {
