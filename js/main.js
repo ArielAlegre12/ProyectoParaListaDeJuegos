@@ -116,6 +116,27 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     }
 
+    //función maestra para agregar juego completo
+    async function agregarJuegoCompleto(juego){
+        const nombreNormalizado = juego.nombre.toLowerCase().trim();
+        const yaExiste = listaJuegos.some(j=>j.nombre.toLowerCase().trim() === nombreNormalizado);
+        if(yaExiste){
+            mostrarMensaje("Este juego ya está en tu lista!");
+            return false;
+        }
+
+        const nuevoJuego = {
+            nombre: juego.nombre,
+            anio: juego.anio,
+            imagen: juego.imagen,
+            estado: "Pendiente"
+        };
+        listaJuegos.push(nuevoJuego);
+        mostrarLista();
+        await guardarJuegoEnDB(nuevoJuego);
+        return true;
+    }
+
     //mostrar o no password
     togglePassword.addEventListener("click", () => {
         if (loginPasswordInput.type === "password") {
@@ -301,7 +322,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     //btn que guarda el juego manualmente
-    btnGuardarManual.addEventListener('click', function () {
+    btnGuardarManual.addEventListener('click', async function () {
         const nombre = nombreManual.value.trim();
         const anio = parseInt(anioManual.value);
         const imagen = imagenManual.value.trim();
@@ -310,24 +331,7 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarMensajeModal("Completa todos los campos");
             return;
         }
-        //chequea si ya existe la lista
-        if (listaJuegos.some(j => j.nombre.toLowerCase() == nombre.toLowerCase())) {
-            mostrarMensajeModal("Este juego ya está en tu lista!");
-            return;
-        }
-        //agregamos a la lista
-        agregarJuegosALaLista({ nombre, anio, imagen });
-        guardarJuegoEnDB({ nombre, anio, imagen});
-
-        //agregamos al catálogo en caso de que no exista
-        if (!catalogoJuegos.some(j => j.nombre.toLowerCase() === nombre.toLowerCase())) {
-            const nuevoJuego = { nombre, anio, imagen };
-            catalogoJuegos.push(nuevoJuego);
-
-        }
-
-        //cerramos el modal
-        modalAgregarJuego.hide();
+        const exito = await agregarJuegoCompleto({nombre, anio, imagen});
     });
 
 
@@ -399,13 +403,10 @@ document.addEventListener('DOMContentLoaded', function () {
             divResultado.textContent = element.nombre;
             divResultado.classList.add("resultado");
 
-            divResultado.addEventListener('click', function () {
-                if (listaJuegos.some(j => j.nombre.toLowerCase() === element.nombre.toLowerCase())) {
-                    mostrarMensaje("Este juego ya está en tu lista!");
-                    return;
-                }
-                agregarJuegosALaLista(element);
-                ocultarMensajeModal();
+            divResultado.addEventListener('click', async function () {
+                await agregarJuegoCompleto(element);
+                entradaJuego.value = "";
+                resultadoBusqueda.innerHTML = "";
             });
             resultadoBusqueda.appendChild(divResultado);
         });
@@ -438,7 +439,7 @@ document.addEventListener('DOMContentLoaded', function () {
     init();
 
     //escuchar el boton del formu.
-    botonBuscador.addEventListener('submit', function (event) {
+    botonBuscador.addEventListener('submit', async function (event) {
         event.preventDefault();
         resultadoBusqueda.innerHTML = "";
         const nombreJuego = entradaJuego.value.trim();
@@ -446,15 +447,7 @@ document.addEventListener('DOMContentLoaded', function () {
         if (nombreJuego != "") {
             const resultado = catalogoJuegos.find(j => j.nombre.toLowerCase() === nombreJuego.toLowerCase());
             if (resultado) {
-                //verifico que aún no este en la lista
-                const yaEstaEnLista = listaJuegos.some(j => j.nombre.toLowerCase() == resultado.nombre.toLowerCase());
-                if (!yaEstaEnLista) {
-                    //agrega el checkList
-                    listaJuegos.push({ nombre: resultado.nombre, anio: resultado.anio, imagen: resultado.imagen, estado: "Pendiente" });
-                    mostrarLista();
-                } else if (yaEstaEnLista) {
-                    mostrarMensaje("Este juego ya lo tenés en tu checkList!");
-                }
+                await agregarJuegoCompleto(resultado);
             } else {
                 mostrarMensaje("Juego no encontrado en el catálogo");
             }
