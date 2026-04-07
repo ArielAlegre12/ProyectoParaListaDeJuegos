@@ -97,12 +97,21 @@ document.addEventListener('DOMContentLoaded', function () {
             listaJuegos.length = 0;
 
             data.forEach(juegoDB=>{
-                listaJuegos.push({
+                const juegoFormateado = {
                     nombre: juegoDB.nombre,
                     anio: juegoDB.anio,
                     imagen: juegoDB.imagen,
                     estado: juegoDB.estado || "Pendiente"
-                });
+                };
+                listaJuegos.push(juegoFormateado);
+                const yaEnCatalogo = catalogoJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
+                    if(!yaEnCatalogo){
+                        catalogoJuegos.push({
+                            nombre: juegoDB.nombre,
+                            anio: juegoDB.anio,
+                            imagen: juegoDB.imagen
+                        });
+                    }
             });
             mostrarLista();
         }
@@ -123,7 +132,18 @@ document.addEventListener('DOMContentLoaded', function () {
             imagen: juego.imagen,
             estado: "Pendiente"
         };
+        //agregamos a la lista actual
         listaJuegos.push(nuevoJuego);
+        //agregamos al catalogo de sugerencias
+        const enCatalogo = catalogoJuegos.some(j=>j.nombre.toLowerCase().trim() === nombreNormalizado);
+        if(!enCatalogo){
+            catalogoJuegos.push({
+                nombre: nuevoJuego.nombre,
+                anio: nuevoJuego.anio,
+                imagen: nuevoJuego.imagen
+            });
+        }
+
         mostrarLista();
         await guardarJuegoEnDB(nuevoJuego);
         return true;
@@ -324,6 +344,9 @@ document.addEventListener('DOMContentLoaded', function () {
             return;
         }
         const exito = await agregarJuegoCompleto({nombre, anio, imagen});
+        if(exito){
+            modalAgregarJuego.hide();
+        }
     });
 
 
