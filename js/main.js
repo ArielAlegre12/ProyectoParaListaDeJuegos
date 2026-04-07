@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 nombre: juego.nombre,
                 anio: juego.anio,
                 imagen: juego.imagen,
+                estado: juego.estado || "Pendiente",
                 user_id: userData.user.id
             }]);
 
@@ -76,17 +77,20 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("error al cargar DB:", error);
         } else if (data) {
             data.forEach(juegoDB => {
-                const existe = catalogoJuegos.some(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
-                if (!existe) {
-                    catalogoJuegos.push(juegoDB);
-                }
-
-                if (!listaJuegos.some(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase())) {
+                if(!listaJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase())){
                     listaJuegos.push({
                         nombre: juegoDB.nombre,
                         anio: juegoDB.anio,
                         imagen: juegoDB.imagen,
-                        estado: "Pendiente"
+                        estado: juegoDB.estado || "Pendiente"
+                    });
+                }
+
+                if(!catalogoJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase())){
+                    catalogoJuegos.push({
+                        nombre: juegoDB.nombre,
+                        anio: juegoDB.anio,
+                        imagen: juegoDB.imagen
                     });
                 }
             });
