@@ -299,7 +299,7 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         //agregamos a la lista
         agregarJuegosALaLista({ nombre, anio, imagen });
-        guardarJuegoEnDB({ nombre, anio, imagen });
+        guardarJuegoEnDB({ nombre, anio, imagen});
 
         //agregamos al catálogo en caso de que no exista
         if (!catalogoJuegos.some(j => j.nombre.toLowerCase() === nombre.toLowerCase())) {
@@ -407,9 +407,13 @@ document.addEventListener('DOMContentLoaded', function () {
     }
     async function init() {
         await cargarCatalogo();
-        const { data: { user } } = await supabase.auth.getUser();
+        const { data, error } = await supabase.auth.getUser();
+        if(error) return console.log("Error al obtener usuario:", error);
+        const user = data.user;
         if (user) {
             mostrarMenuUsuario(user);
+            await cargarCatalogo();
+            console.log("Usuario al recargar:", user);
             await cargarDesdeBD();
         }
     }
