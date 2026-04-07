@@ -43,7 +43,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const{data: userData, error: userError} = await supabase.auth.getUser();
 
         if(userError || !userData.user){
-            console.log("No hay usuario logueado");
+            mostrarMensajeLogin("No hay usuario logueado");
             return;
         }
 
