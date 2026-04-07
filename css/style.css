@@ -20,6 +20,12 @@ html{
     background-size: 400% 400%;
     animation: gradientBG 10s ease infinite;
 }
+.navbar .nav-link,
+.navbar .navbar-brand{
+    color: white;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8);
+}
+
 /*evitar que el nav tape los juegos*/
 #listGames{
     scroll-margin-top: 80px;
@@ -131,7 +137,11 @@ html{
     color: white;
     position: relative;
     animation: glitch 2s infinite;
-    text-shadow: 0 0 5px #0d6efd;
+    text-shadow: 
+    0 0 5px #000,
+    0 0 10px #000,
+    0 0 20px #0d6efd;
+
 }
 @keyframes glitch{
     0% {transform: translate(0);}
