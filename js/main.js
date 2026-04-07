@@ -88,39 +88,42 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //cargar desde DB
     async function cargarDesdeBD() {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
-        if (userError || !userData.user) return;
+    const { data: userData, error: userError } = await supabase.auth.getUser();
+    if (userError || !userData.user) return;
 
-        const { data, error } = await supabase
-            .from('games')
-            .select('*')
-            .eq('user_id', userData.user.id);
+    const { data, error } = await supabase
+        .from('games')
+        .select('*')
+        .eq('user_id', userData.user.id);
 
-        if (error) {
-            console.log("error al cargar DB:", error);
-        } else if (data) {
-            listaJuegos.length = 0;
-
-            data.forEach(juegoDB=>{
-                const juegoFormateado = {
+    if (error) {
+        console.log("error al cargar DB:", error);
+    } else if (data) {
+        //Si ya hay juegos en la lista local (del cache), no los borramos todos
+        //solo agregamos los que falten y actualizamos el catálogo
+        data.forEach(juegoDB => {
+            const indexLocal = listaJuegos.findIndex(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
+            
+            if (indexLocal === -1) {
+                //si el juego NO está en mi lista local, lo agrego
+                listaJuegos.push({
                     nombre: juegoDB.nombre,
                     anio: juegoDB.anio,
                     imagen: juegoDB.imagen,
                     estado: juegoDB.estado || "Pendiente"
-                };
-                listaJuegos.push(juegoFormateado);
-                const yaEnCatalogo = catalogoJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
-                    if(!yaEnCatalogo){
-                        catalogoJuegos.push({
-                            nombre: juegoDB.nombre,
-                            anio: juegoDB.anio,
-                            imagen: juegoDB.imagen
-                        });
-                    }
-            });
-            mostrarLista();
-        }
+                });
+            } 
+            //actualizar catálogo de sugerencias
+            const yaEnCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
+            if (!yaEnCatalogo) {
+                catalogoJuegos.push({ nombre: juegoDB.nombre, anio: juegoDB.anio, imagen: juegoDB.imagen });
+            }
+        });
+
+        mostrarLista();
+        guardarEnLocalStorage();
     }
+}
 
     //función maestra para agregar juego completo
     async function agregarJuegoCompleto(juego){
@@ -552,13 +555,15 @@ document.addEventListener('DOMContentLoaded', function () {
                 element.estado = estados[element.estado] || "Pendiente";
                 mostrarLista();
                 guardarEnLocalStorage();
-                await actualizarEstadoJuegoEnDB(element);
 
                 try{
-                    await actualizarEstadoJuegoEnDB(element);
-                    mostrarLista();
+                    const error = await actualizarEstadoJuegoEnDB(element);
+                    if(error) throw error;
+                    console.log("Estado sincronizado en DB");
                 }catch(err){
                     element.estado = estadoAnterior;
+                    mostrarLista();
+                    guardarEnLocalStorage();
                     alert("Error al actualizar el estado en el servidor.");
                 }
             });
@@ -583,6 +588,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .eq('nombre', juego.nombre);
 
         if (error) console.log("error al actualizar estado:", error);
+        return null;
     }
 
 
