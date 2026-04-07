@@ -40,14 +40,14 @@ document.addEventListener('DOMContentLoaded', function () {
     //función para supabase
     async function guardarJuegoEnDB(juego) {
         const user = supabase.auth.getUser();
-        const{data: userData, error: userError} = await supabase.auth.getUser();
+        const { data: userData, error: userError } = await supabase.auth.getUser();
 
-        if(userError || !userData.user){
+        if (userError || !userData.user) {
             mostrarMensajeLogin("No hay usuario logueado");
             return;
         }
 
-        const{data, error} = await supabase
+        const { data, error } = await supabase
             .from('games')
             .insert([{
                 nombre: juego.nombre,
@@ -56,51 +56,51 @@ document.addEventListener('DOMContentLoaded', function () {
                 user_id: userData.user.id
             }]);
 
-            if(error){
-                console.log("Error al guardar juego:", error);
-            }else{
-                console.log("Juego guardado en DB:", data);
-            }
+        if (error) {
+            console.log("Error al guardar juego:", error);
+        } else {
+            console.log("Juego guardado en DB:", data);
+        }
     }
     //cargar desde DB
-    async function cargarDesdeBD(){
-        const{data: userData, error: userError} = await supabase.auth.getUser();
-        if(userError || !userData.user) return;
+    async function cargarDesdeBD() {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) return;
 
-        const{data, error} = await supabase
+        const { data, error } = await supabase
             .from('games')
             .select('*')
             .eq('user_id', userData.user.id);
 
-            if(error){
-                console.log("error al cargar DB:", error);
-            }else if(data){
-                data.forEach(juegoDB=>{
-                    const existe = catalogoJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
-                    if(!existe){
-                        catalogoJuegos.push(juegoDB);
-                    }
+        if (error) {
+            console.log("error al cargar DB:", error);
+        } else if (data) {
+            data.forEach(juegoDB => {
+                const existe = catalogoJuegos.some(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
+                if (!existe) {
+                    catalogoJuegos.push(juegoDB);
+                }
 
-                    if(!listaJuegos.some(j=>nombre.toLowerCase() === juegoDB.nombre.toLowerCase())){
-                        listaJuegos.push({
-                            nombre: juegoDB.nombre,
-                            anio: juegoDB.anio,
-                            imagen: juegoDB.imagen,
-                            estado: "Pendiente"
-                        });
-                    }
-                });
-                mostrarLista();
-            }
+                if (!listaJuegos.some(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase())) {
+                    listaJuegos.push({
+                        nombre: juegoDB.nombre,
+                        anio: juegoDB.anio,
+                        imagen: juegoDB.imagen,
+                        estado: "Pendiente"
+                    });
+                }
+            });
+            mostrarLista();
+        }
     }
 
     //mostrar o no password
-    togglePassword.addEventListener("click", ()=>{
-        if(loginPasswordInput.type === "password"){
+    togglePassword.addEventListener("click", () => {
+        if (loginPasswordInput.type === "password") {
             loginPasswordInput.type = "text";
             icon.classList.remove("bi-eye");
             icon.classList.add("bi-eye-slash");
-        }else{
+        } else {
             loginPasswordInput.type = "password";
             icon.classList.remove("bi-eye-slash");
             icon.classList.add("bi-eye");
@@ -108,7 +108,7 @@ document.addEventListener('DOMContentLoaded', function () {
     })
 
     //función para reinciar el titulo
-    function reinciaAnimacion(){
+    function reinciaAnimacion() {
         titulo.classList.remove("titulo-gamer");
         //forzar el reflow
         void titulo.offsetWidth;
@@ -118,24 +118,24 @@ document.addEventListener('DOMContentLoaded', function () {
     setInterval(reinciaAnimacion, 5000);//repite en bucle
 
     //función para evitar que la lupa de busqueda aplaste el footer jei
-    window.addEventListener("scroll", function(){
+    window.addEventListener("scroll", function () {
         const footerRect = footer.getBoundingClientRect();
         const windowHeight = window.innerHeight;
 
-        if(footerRect.top < windowHeight){
+        if (footerRect.top < windowHeight) {
             //está tocando el footer?si, subir la lupa
             btnBuscar.style.bottom = (windowHeight - footerRect.top + 20) + "px";
-        }else{
+        } else {
             //pos. normal
             btnBuscar.style.bottom = "20px";
         }
     })
 
     //cerrar menu al hacer click afuera(para moviles)
-    document.addEventListener('click', function(event){
+    document.addEventListener('click', function (event) {
         const clickAdentro = navbar.contains(event.target);
 
-        if(!clickAdentro  && collapse.classList.contains('show')){
+        if (!clickAdentro && collapse.classList.contains('show')) {
             const bsCollapse = new bootstrap.Collapse(collapse, {
                 toggle: false
             });
@@ -190,45 +190,83 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     //mostrar msj modal login
-    function mostrarMensajeLogin(texto){
+    function mostrarMensajeLogin(texto) {
         loginMessage.style.display = "block";
         loginMessage.textContent = texto;
-        setTimeout(()=>loginMessage.style.display = "none", 2000);
+        setTimeout(() => loginMessage.style.display = "none", 2000);
     }
     //registro
-    btnRegister.addEventListener("click", async()=>{
+    btnRegister.addEventListener("click", async () => {
         btnRegister.disabled = true;
-        const{data, error} = await supabase.auth.signUp({
+        const { data, error } = await supabase.auth.signUp({
             email: loginEmail.value,
             password: loginPassword.value
         });
-        if(error){
+        if (error) {
             mostrarMensajeLogin(error.message);
-            if(error.status === 429){
+            if (error.status === 429) {
                 mostrarMensajeLogin("Demasiados intentos. Esperá unos segundos.");
             }
-        }else{
+        } else {
             mostrarMensajeLogin("Usuario creado! Revisa tu correo para confirmar.");
         }
-        setTimeout(()=> btnRegister.disabled = false, 52000);
+        setTimeout(() => btnRegister.disabled = false, 52000);
     });
 
     //login
-    btnLogin.addEventListener("click", async()=>{
-        const{data, error} = await supabase.auth.signInWithPassword({
+    btnLogin.addEventListener("click", async () => {
+        const { data, error } = await supabase.auth.signInWithPassword({
             email: loginEmail.value,
             password: loginPassword.value
         });
-        if(error){
+        if (error) {
             mostrarMensajeLogin(error.message);
-        }else{
+        } else {
             mostrarMensajeLogin("Bienvenido!");
             console.log("usuario logueado: ", data.user);
             //acá se carga la lista de juegos del usuario
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalLogin'));
             modal.hide();//cierra el modal al ingresar
+            mostrarMenuUsuario(data.user);
+            
+            //limpiar listas antes de cargar
+            listaJuegos.length = 0;
+            catalogoJuegos.length = 0;
+            //cargar el catalogo + juegos guardados del usuario
+            await cargarCatalogo();
+            await cargarDesdeBD();
         }
     })
+
+    //función para el menu de usuario
+    function mostrarMenuUsuario(user) {
+        const loginContainer = document.getElementById("navLogin");
+        if (!loginContainer) return;
+        loginContainer.innerHTML = `
+        <div class="dropdown">
+            <button class="btn btn-secondary dropdown-toggle" type="button" id="userMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
+            ${user.email}
+            </button>
+            <ul class="dropdown-menu" aria-labelledby="userMenuButton">
+                <li><button class="dropdown-item" id="btnLogout">Cerrar sesión</button></li>
+            </ul>
+        </div>
+        `;
+
+        document.getElementById("btnLogout").addEventListener("click", async () => {
+            await supabase.auth.signOut();
+            //limpiamos listas y DOM
+            listaJuegos.length = 0;
+            catalogoJuegos.length = 0;
+            divJuegos.innerHTML = "";
+            //restaurar login original
+            loginContainer.innerHTML = `
+            <li class="nav-item">
+                <a href="#" class="nav-link active" data-bs-toggle="modal" data-bs-target="#modalLogin">Login</a>
+            </li>
+        `;
+        });
+    }
 
     //abrir el modal al hacer click
     btnAgregarManual.addEventListener('click', function () {
@@ -257,29 +295,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         //agregamos a la lista
         agregarJuegosALaLista({ nombre, anio, imagen });
-        guardarJuegoEnDB({nombre, anio, imagen});
+        guardarJuegoEnDB({ nombre, anio, imagen });
 
         //agregamos al catálogo en caso de que no exista
         if (!catalogoJuegos.some(j => j.nombre.toLowerCase() === nombre.toLowerCase())) {
             const nuevoJuego = { nombre, anio, imagen };
             catalogoJuegos.push(nuevoJuego);
 
-            //guardar en el localStorage(solo los manuales)
-            const catalogoGuardado = JSON.parse(localStorage.getItem("catalogoJuegos")) || [];
-            catalogoGuardado.push(nuevoJuego);
-            localStorage.setItem("catalogoJuegos", JSON.stringify(catalogoGuardado));
         }
 
         //cerramos el modal
         modalAgregarJuego.hide();
     });
 
-    //intentar cargar lista guardad en localStorage
-    const juegosGuardados = localStorage.getItem("misJuegos");
-    if (juegosGuardados) {
-        listaJuegos.push(...JSON.parse(juegosGuardados));
-        mostrarLista();
-    }
+
 
     //agregar juegos a la lista
     function agregarJuegosALaLista(element) {
@@ -366,28 +395,19 @@ document.addEventListener('DOMContentLoaded', function () {
             const respuesta = await fetch('data/catalogo.json');
             const catalogoBase = await respuesta.json();
 
-            //cargar los juegos manuales guardados
-            const catalogoGuardado = JSON.parse(localStorage.getItem("catalogoJuegos")) || [];
-
-            //unir ambos catálogos
-            catalogoJuegos = [...catalogoBase];
-            catalogoGuardado.forEach(juegoManual => {
-                const existe = catalogoJuegos.some(j =>
-                    j.nombre.toLowerCase() === juegoManual.nombre.toLowerCase()
-                );
-                if (!existe) {
-                    catalogoJuegos.push(juegoManual);
-                }
-            });
-
             console.log(catalogoJuegos);
+            catalogoJuegos.push(...catalogoBase);
         } catch (error) {
             console.log("Error al cargar el catálogo: ", error);
         }
     }
     async function init() {
         await cargarCatalogo();
-        await cargarDesdeBD();
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+            mostrarMenuUsuario(user);
+            await cargarDesdeBD();
+        }
     }
     init();
 
@@ -465,9 +485,7 @@ document.addEventListener('DOMContentLoaded', function () {
             btnEliminarJuego.addEventListener('click', function () {
                 listaJuegos.splice(index, 1);
                 mostrarLista();
-                if (listaJuegos.length == 0) {
-                    localStorage.removeItem("misJuegos");
-                }
+
             });
 
             btnCambiarEstado.addEventListener('click', function () {
@@ -488,7 +506,20 @@ document.addEventListener('DOMContentLoaded', function () {
             divJuegos.appendChild(col);
 
         });
-        localStorage.setItem("misJuegos", JSON.stringify(listaJuegos));
+        listaJuegos.forEach(juego => actualizarEstadoJuegoEnDB(juego));
+    }
+
+    async function actualizarEstadoJuegoEnDB(juego) {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) return;
+
+        const { error } = await supabase
+            .from('games')
+            .update({ estado: juego.estado })
+            .eq('user_id', userData.user.id)
+            .eq('nombre', juego.nombre);
+
+        if (error) console.log("error al actualizar estado:", error);
     }
 
 
