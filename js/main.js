@@ -94,23 +94,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (error) {
             console.log("error al cargar DB:", error);
         } else if (data) {
-            data.forEach(juegoDB => {
-                if(!listaJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase())){
-                    listaJuegos.push({
-                        nombre: juegoDB.nombre,
-                        anio: juegoDB.anio,
-                        imagen: juegoDB.imagen,
-                        estado: juegoDB.estado || "Pendiente"
-                    });
-                }
+            listaJuegos.length = 0;
 
-                if(!catalogoJuegos.some(j=>j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase())){
-                    catalogoJuegos.push({
-                        nombre: juegoDB.nombre,
-                        anio: juegoDB.anio,
-                        imagen: juegoDB.imagen
-                    });
-                }
+            data.forEach(juegoDB=>{
+                listaJuegos.push({
+                    nombre: juegoDB.nombre,
+                    anio: juegoDB.anio,
+                    imagen: juegoDB.imagen,
+                    estado: juegoDB.estado || "Pendiente"
+                });
             });
             mostrarLista();
         }
