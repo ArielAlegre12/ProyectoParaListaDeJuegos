@@ -39,7 +39,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //función para supabase
     async function guardarJuegoEnDB(juego) {
-        const user = supabase.auth.getUser();
         const { data: userData, error: userError } = await supabase.auth.getUser();
 
         if (userError || !userData.user) {
@@ -63,6 +62,25 @@ document.addEventListener('DOMContentLoaded', function () {
             console.log("Juego guardado en DB:", data);
         }
     }
+
+    //función para borrar los juegos de la db
+    async function eliminarJuegosDeDB(nombreJuego){
+        const{data: userData, error: userError} = await supabase.auth.getUser();
+        if(userError || !userData.user) return;
+
+        const{error} = await supabase
+            .from('games')
+            .delete()
+            .eq('user_id', userData.user.id)
+            .eq('nombre', nombreJuego);
+
+        if(error){
+            console.error("Error al eliminar de la DB:", error.message);
+        }else{
+            console.log("Juego eliminado de la DB");
+        }
+    }
+
     //cargar desde DB
     async function cargarDesdeBD() {
         const { data: userData, error: userError } = await supabase.auth.getUser();
@@ -400,7 +418,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const catalogoBase = await respuesta.json();
 
             console.log(catalogoJuegos);
-            catalogoJuegos.push(...catalogoBase);
+            catalogoJuegos = [...catalogoBase];
         } catch (error) {
             console.log("Error al cargar el catálogo: ", error);
         }
@@ -490,22 +508,35 @@ document.addEventListener('DOMContentLoaded', function () {
             btnEliminarJuego.classList.add("btn", "btn-danger", "mt-auto");
 
             //eventos
-            btnEliminarJuego.addEventListener('click', function () {
-                listaJuegos.splice(index, 1);
-                mostrarLista();
-
+            btnEliminarJuego.addEventListener('click', async function () {
+                try{
+                    await eliminarJuegosDeDB(element.nombre);
+                    listaJuegos.splice(index,1);
+                    mostrarLista();
+                }catch(err){
+                    alert("No se pudo eliminar el juego. Revisa tu conexión.");
+                }
             });
 
-            btnCambiarEstado.addEventListener('click', function () {
-                if (element.estado == "Pendiente") {
-                    element.estado = "Completado";
-                } else if (element.estado == "Completado") {
-                    element.estado = "En proceso";
-                } else {
-                    element.estado = "Pendiente"
+            btnCambiarEstado.addEventListener('click', async function () {
+                const estadoAnterior = element.estado;
+
+                //lóg de rotación de estados
+                const estados = {
+                    "Pendiente": "Completado",
+                    "Completado": "En proceso",
+                    "En proceso": "Pendiente"
                 }
-                mostrarLista();
-            })
+                element.estado = estados[element.estado] || "Pendiente";
+
+                try{
+                    await actualizarEstadoJuegoEnDB(element);
+                    mostrarLista();
+                }catch(err){
+                    element.estado = estadoAnterior;
+                    alert("Error al actualizar el estado en el servidor.");
+                }
+            });
 
             //el armado
             cardBody.append(titulo, texto, btnCambiarEstado, btnEliminarJuego);
@@ -514,7 +545,6 @@ document.addEventListener('DOMContentLoaded', function () {
             divJuegos.appendChild(col);
 
         });
-        listaJuegos.forEach(juego => actualizarEstadoJuegoEnDB(juego));
     }
 
     async function actualizarEstadoJuegoEnDB(juego) {
