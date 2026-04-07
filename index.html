@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Vago Zone</title>
     <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
     <link rel="icon" href="assets/img/favicon-16x16.png">
 </head>
@@ -31,6 +32,9 @@
                         <li class="nav-item">
                             <a href="#faqs" class="nav-link active" aria-current="page">FaQ</a>
                         </li>
+                        <li class="nav-item">
+                            <a href="#" class="nav-link active" data-bs-toggle="modal" data-bs-target="#modalLogin">Login</a>
+                        </li>
                     </ul>
                 </div>
             </div>
@@ -52,10 +56,7 @@
             <p class="text-center text-secondary">
                 Acá guardás los juegos que muy probablemente nunca los termines &gt;&lt;
             </p>
-            <div>
-
-            </div>
-            <!--formulario-->
+            <!--formulario -->
             <form id="miFormu" class="d-flex gap-2 mb-3">
                 <input id="entradaJuego" type="text" placeholder="escribe el juego" name="busqueda" autocomplete="off">
                 <button type="button" class="btn btn-primary" id="btnAgregarManual">agregar</button>
@@ -95,7 +96,8 @@
                 <a href="#listGames" class="me-3 text-decoration-none">Juegos</a>
                 <a href="#faqs" class=" me-3 text-decoration-none">FAQ</a>
                 <a href="https://github.com/ArielAlegre12" target="_blank" class=" me-3 text-decoration-none">GitHub</a>
-                <a href="https://instagram.com/alegreariel666" target="_blank" class="me-3 text-decoration-none">Instagram</a>
+                <a href="https://instagram.com/alegreariel666" target="_blank"
+                    class="me-3 text-decoration-none">Instagram</a>
             </div>
             <small>
                 © 2026 - Hecho por ariel.
@@ -104,7 +106,7 @@
 
     </footer>
 
-    <!--modelo para agregar juegos manualmente-->
+    <!--modal para agregar juegos manualmente-->
     <div class="modal fade" id="modalAgregarJuego" tabindex="-1" aria-labelledby="modalAgregarJuegoLabel"
         aria-hidden="true">
         <div class="modal-dialog">
@@ -139,8 +141,45 @@
             </div>
         </div>
     </div>
+
+    <!--modal para el login-->
+    <div class="modal fade" id="modalLogin" tabeindex="-1" aria-labelledby="modalLoginLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content bg-dark text-light">
+                <div class="modal-header">
+                    <h5 class="modal-tittle" id="modalLoginLabel">Ingresar a Vago Zone</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"
+                        aria-label="Cerrar"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="formLogin">
+                        <div class="mb-3">
+                            <label for="loginEmal" class="form-label">Correo electrónico</label>
+                            <input type="email" class="form-control" id="loginEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loginPassword" class="form-label">Contraseña</label>
+                            <div class="input-group">
+                                <input type="password" class="form-control" id="loginPassword" required>
+                                <span class="input-group-text" id="togglePassword" style="cursor:pointer;">
+                                    <i class="bi bi-eye"></i>
+                                </span>
+                            </div>
+                        </div>
+                    </form>
+                    <p id="loginMessage" class="text-danger m-0" style="display: none;"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="btnLogin">Ingresar</button>
+                    <button type="button" class="btn btn-success" id="btnRegister">Registrarse</button>
+                </div>
+            </div>
+        </div>
+    </div>
     <script src="js/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </body>
 
 </html>
