@@ -99,9 +99,9 @@ document.addEventListener('DOMContentLoaded', function () {
     if (error) {
         console.log("error al cargar DB:", error);
     } else if (data) {
+        console.log("Juegos cargados de DB:", data.length);
         // Limpiar listaJuegos y recargar desde DB para asegurar sincronización
         listaJuegos.length = 0;
-        catalogoJuegos.length = 0;
         
         data.forEach(juegoDB => {
             listaJuegos.push({
@@ -111,8 +111,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 estado: juegoDB.estado || "Pendiente"
             });
             
-            // Agregar al catálogo de sugerencias
-            catalogoJuegos.push({ nombre: juegoDB.nombre, anio: juegoDB.anio, imagen: juegoDB.imagen });
+            // Agregar al catálogo de sugerencias si no está ya
+            const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === juegoDB.nombre.toLowerCase().trim());
+            if (!enCatalogo) {
+                catalogoJuegos.push({ nombre: juegoDB.nombre, anio: juegoDB.anio, imagen: juegoDB.imagen });
+            }
         });
 
         mostrarLista();
@@ -440,6 +443,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             console.log(catalogoJuegos);
             catalogoJuegos = [...catalogoBase];
+            console.log("Catálogo cargado:", catalogoJuegos.length, "juegos");
         } catch (error) {
             console.log("Error al cargar el catálogo: ", error);
         }
@@ -458,7 +462,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const user = data.user;
         if (user) {
             mostrarMenuUsuario(user);
-            await cargarCatalogo();
             await cargarDesdeBD();
         }
     }
