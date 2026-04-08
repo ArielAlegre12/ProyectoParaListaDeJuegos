@@ -99,25 +99,20 @@ document.addEventListener('DOMContentLoaded', function () {
     if (error) {
         console.log("error al cargar DB:", error);
     } else if (data) {
-        //Si ya hay juegos en la lista local (del cache), no los borramos todos
-        //solo agregamos los que falten y actualizamos el catálogo
+        // Limpiar listaJuegos y recargar desde DB para asegurar sincronización
+        listaJuegos.length = 0;
+        catalogoJuegos.length = 0;
+        
         data.forEach(juegoDB => {
-            const indexLocal = listaJuegos.findIndex(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
+            listaJuegos.push({
+                nombre: juegoDB.nombre,
+                anio: juegoDB.anio,
+                imagen: juegoDB.imagen,
+                estado: juegoDB.estado || "Pendiente"
+            });
             
-            if (indexLocal === -1) {
-                //si el juego NO está en mi lista local, lo agrego
-                listaJuegos.push({
-                    nombre: juegoDB.nombre,
-                    anio: juegoDB.anio,
-                    imagen: juegoDB.imagen,
-                    estado: juegoDB.estado || "Pendiente"
-                });
-            } 
-            //actualizar catálogo de sugerencias
-            const yaEnCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase() === juegoDB.nombre.toLowerCase());
-            if (!yaEnCatalogo) {
-                catalogoJuegos.push({ nombre: juegoDB.nombre, anio: juegoDB.anio, imagen: juegoDB.imagen });
-            }
+            // Agregar al catálogo de sugerencias
+            catalogoJuegos.push({ nombre: juegoDB.nombre, anio: juegoDB.anio, imagen: juegoDB.imagen });
         });
 
         mostrarLista();
