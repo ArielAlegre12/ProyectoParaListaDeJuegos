@@ -13,5 +13,20 @@
         "nombre": "The Last Of Us Part II",
         "anio": 2022,
         "imagen": "assets/img/tlou2.png"
+    },
+    {
+        "nombre": "Far Cry 3",
+        "anio": 2012,
+        "imagen": "https://image.api.playstation.com/vulcan/img/rnd/202010/0923/hNKimMvniIuUbhlhPqXey86t.jpg"
+    },
+    {
+        "nombre": "Far Cry 4",
+        "anio": 2014,
+        "imagen": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/298110/header.jpg?t=1764168324"
+    },
+    {
+        "nombre": "Far Cry 5",
+        "anio": 2018,
+        "imagen": "https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/552520/capsule_616x353.jpg?t=1762190084"
     }
 ]
