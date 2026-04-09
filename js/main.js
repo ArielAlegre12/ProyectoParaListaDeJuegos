@@ -483,17 +483,24 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function init() {
         await cargarCatalogo();
-        const cache = localStorage.getItem("mis_juegos_cache");
-        if (cache) {
-            listaJuegos.push(...JSON.parse(cache));
-            mostrarLista();
-        }
 
         const { data } = await supabase.auth.getUser();
         const user = data.user;
+
         if (user) {
             mostrarMenuUsuario(user);
+
+            // 🔥 IMPORTANTE: limpiar antes de cargar desde DB
+            listaJuegos.length = 0;
+
             await cargarDesdeBD();
+        } else {
+            // 👉 SOLO si NO hay usuario usamos cache
+            const cache = localStorage.getItem("mis_juegos_cache");
+            if (cache) {
+                listaJuegos.push(...JSON.parse(cache));
+                mostrarLista();
+            }
         }
     }
     init();
