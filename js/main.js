@@ -490,12 +490,8 @@ document.addEventListener('DOMContentLoaded', function () {
         if (user) {
             mostrarMenuUsuario(user);
 
-            // 🔥 IMPORTANTE: limpiar antes de cargar desde DB
-            listaJuegos.length = 0;
-
             await cargarDesdeBD();
         } else {
-            // 👉 SOLO si NO hay usuario usamos cache
             const cache = localStorage.getItem("mis_juegos_cache");
             if (cache) {
                 listaJuegos.push(...JSON.parse(cache));
