@@ -103,47 +103,51 @@ document.addEventListener('DOMContentLoaded', function () {
 
         if (error) {
             console.log("error al cargar DB:", error);
-        } else if (data) {
-            console.log("Juegos cargados de DB:", data.length);
-            // Limpiar listaJuegos y recargar desde DB para asegurar sincronización
-            listaJuegos.length = 0;
+            return
+        }
 
-            data.forEach(juegoDB => {
-                if(!juegoDB.catalogo_games)return;
-                listaJuegos.push({
+        if (!data || data.length === 0) {
+            console.log("DB vacia, no se toca la lista local");
+            return
+        }
+        listaJuegos.length = 0;
+
+        data.forEach(juegoDB => {
+            if (!juegoDB.catalogo_games) return;
+            listaJuegos.push({
+                id: juegoDB.catalogo_games.id,
+                nombre: juegoDB.catalogo_games.nombre,
+                anio: juegoDB.catalogo_games.anio,
+                imagen: juegoDB.catalogo_games.imagen,
+                estado: juegoDB.estado || "Pendiente"
+            });
+
+            // Agregar al catálogo de sugerencias si no está ya
+            const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === juegoDB.catalogo_games.nombre.toLowerCase().trim());
+            if (!enCatalogo) {
+                catalogoJuegos.push({
                     id: juegoDB.catalogo_games.id,
                     nombre: juegoDB.catalogo_games.nombre,
                     anio: juegoDB.catalogo_games.anio,
-                    imagen: juegoDB.catalogo_games.imagen,
-                    estado: juegoDB.estado || "Pendiente"
+                    imagen: juegoDB.catalogo_games.imagen
                 });
+            }
+        });
 
-                // Agregar al catálogo de sugerencias si no está ya
-                const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === juegoDB.catalogo_games.nombre.toLowerCase().trim());
-                if (!enCatalogo) {
-                    catalogoJuegos.push({
-                        id: juegoDB.catalogo_games.id,
-                        nombre: juegoDB.catalogo_games.nombre,
-                        anio: juegoDB.catalogo_games.anio,
-                        imagen: juegoDB.catalogo_games.imagen
-                    });
-                }
-            });
+        mostrarLista();
+        guardarEnLocalStorage();
 
-            mostrarLista();
-            guardarEnLocalStorage();
-        }
     }
 
     //función para agregar un juego de manera manual
-    async function agregarJuegoManual(nombre, anio, imagen){
-        const{data, error} = await supabase
+    async function agregarJuegoManual(nombre, anio, imagen) {
+        const { data, error } = await supabase
             .from('catalogo_games')
-            .insert([{nombre, anio, imagen}])
+            .insert([{ nombre, anio, imagen }])
             .select()
             .single();
 
-        if(error){
+        if (error) {
             console.log("Error creando juego en catálogo", error);
             return;
         }
@@ -479,24 +483,17 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function init() {
         await cargarCatalogo();
+        const cache = localStorage.getItem("mis_juegos_cache");
+        if (cache) {
+            listaJuegos.push(...JSON.parse(cache));
+            mostrarLista();
+        }
 
-        const{data, error} = await supabase.auth.getUser();
-        if(error)return;
-
-        const user  = data.user;
-
-        if(user){
-            localStorage.removeItem("mis_juegos_cache");
+        const { data } = await supabase.auth.getUser();
+        const user = data.user;
+        if (user) {
             mostrarMenuUsuario(user);
-            listaJuegos.length = 0;
             await cargarDesdeBD();
-        }else{
-            const cache = localStorage.getItem("mis_juegos_cache");
-            if(cache){
-                listaJuegos.length = 0;
-                listaJuegos.push(...JSON.parse(cache));
-                mostrarLista();
-            }
         }
     }
     init();
