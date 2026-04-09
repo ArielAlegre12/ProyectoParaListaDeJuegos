@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', function () {
             listaJuegos.length = 0;
 
             data.forEach(juegoDB => {
-                if(!juegoDB.catalogoJuegos)return;
+                if(!juegoDB.catalogo_games)return;
                 listaJuegos.push({
                     id: juegoDB.catalogo_games.id,
                     nombre: juegoDB.catalogo_games.nombre,
@@ -170,6 +170,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === nombreNormalizado);
         if (!enCatalogo) {
             catalogoJuegos.push({
+                id: nuevoJuego.id,
                 nombre: nuevoJuego.nombre,
                 anio: nuevoJuego.anio,
                 imagen: nuevoJuego.imagen
@@ -478,19 +479,23 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function init() {
         await cargarCatalogo();
-        //carga instantanea
-        const cache = localStorage.getItem("mis_juegos_cache");
-        if (cache) {
-            listaJuegos.length = 0;
-            listaJuegos.push(...JSON.parse(cache));
-            mostrarLista();
-        }
-        const { data, error } = await supabase.auth.getUser();
-        if (error) return;
-        const user = data.user;
-        if (user) {
+
+        const{data, error} = await supabase.auth.getUser();
+        if(error)return;
+
+        const user  = data.user;
+
+        if(user){
             mostrarMenuUsuario(user);
+
             await cargarDesdeBD();
+        }else{
+            const cache = localStorage.getItem("mis_juegos_cache");
+            if(cache){
+                listaJuegos.length = 0;
+                listaJuegos.push(...JSON.parse(cache));
+                mostrarLista();
+            }
         }
     }
     init();
