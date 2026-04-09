@@ -486,8 +486,9 @@ document.addEventListener('DOMContentLoaded', function () {
         const user  = data.user;
 
         if(user){
+            localStorage.removeItem("mis_juegos_cache");
             mostrarMenuUsuario(user);
-
+            listaJuegos.length = 0;
             await cargarDesdeBD();
         }else{
             const cache = localStorage.getItem("mis_juegos_cache");
