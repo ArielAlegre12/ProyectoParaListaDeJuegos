@@ -49,9 +49,7 @@ document.addEventListener('DOMContentLoaded', function () {
         const { data, error } = await supabase
             .from('games')
             .insert([{
-                nombre: juego.nombre,
-                anio: juego.anio,
-                imagen: juego.imagen,
+                catalogo_id: juego.id,
                 estado: juego.estado || "Pendiente",
                 user_id: userData.user.id
             }]);
@@ -64,86 +62,113 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     //funcion sincronizar localmente
-    function guardarEnLocalStorage(){
+    function guardarEnLocalStorage() {
         localStorage.setItem("mis_juegos_cache", JSON.stringify(listaJuegos));
     }
 
     //función para borrar los juegos de la db
-    async function eliminarJuegosDeDB(nombreJuego){
-        const{data: userData, error: userError} = await supabase.auth.getUser();
-        if(userError || !userData.user) return;
+    async function eliminarJuegosDeDB(juego) {
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) return;
 
-        const{error} = await supabase
+        const { error } = await supabase
             .from('games')
             .delete()
             .eq('user_id', userData.user.id)
-            .eq('nombre', nombreJuego);
+            .eq('catalogo_id', juego.id);
 
-        if(error){
+        if (error) {
             console.error("Error al eliminar de la DB:", error.message);
-        }else{
+        } else {
             console.log("Juego eliminado de la DB");
         }
     }
 
     //cargar desde DB
     async function cargarDesdeBD() {
-    const { data: userData, error: userError } = await supabase.auth.getUser();
-    if (userError || !userData.user) return;
+        const { data: userData, error: userError } = await supabase.auth.getUser();
+        if (userError || !userData.user) return;
 
-    const { data, error } = await supabase
-        .from('games')
-        .select('*')
-        .eq('user_id', userData.user.id);
+        const { data, error } = await supabase
+            .from('games')
+            .select(`
+            estado,
+            catalogo_games(
+                id,
+                nombre,
+                anio,
+                imagen)
+            `)
+            .eq('user_id', userData.user.id);
 
-    if (error) {
-        console.log("error al cargar DB:", error);
-    } else if (data) {
-        console.log("Juegos cargados de DB:", data.length);
-        // Limpiar listaJuegos y recargar desde DB para asegurar sincronización
-        listaJuegos.length = 0;
-        
-        data.forEach(juegoDB => {
-            listaJuegos.push({
-                nombre: juegoDB.nombre,
-                anio: juegoDB.anio,
-                imagen: juegoDB.imagen,
-                estado: juegoDB.estado || "Pendiente"
+        if (error) {
+            console.log("error al cargar DB:", error);
+        } else if (data) {
+            console.log("Juegos cargados de DB:", data.length);
+            // Limpiar listaJuegos y recargar desde DB para asegurar sincronización
+            listaJuegos.length = 0;
+
+            data.forEach(juegoDB => {
+                if(!juegoDB.catalogoJuegos)return;
+                listaJuegos.push({
+                    id: juegoDB.catalogo_games.id,
+                    nombre: juegoDB.catalogo_games.nombre,
+                    anio: juegoDB.catalogo_games.anio,
+                    imagen: juegoDB.catalogo_games.imagen,
+                    estado: juegoDB.estado || "Pendiente"
+                });
+
+                // Agregar al catálogo de sugerencias si no está ya
+                const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === juegoDB.catalogo_games.nombre.toLowerCase().trim());
+                if (!enCatalogo) {
+                    catalogoJuegos.push({
+                        id: juegoDB.catalogo_games.id,
+                        nombre: juegoDB.catalogo_games.nombre,
+                        anio: juegoDB.catalogo_games.anio,
+                        imagen: juegoDB.catalogo_games.imagen
+                    });
+                }
             });
-            
-            // Agregar al catálogo de sugerencias si no está ya
-            const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === juegoDB.nombre.toLowerCase().trim());
-            if (!enCatalogo) {
-                catalogoJuegos.push({ nombre: juegoDB.nombre, anio: juegoDB.anio, imagen: juegoDB.imagen });
-            }
-        });
 
-        mostrarLista();
-        guardarEnLocalStorage();
+            mostrarLista();
+            guardarEnLocalStorage();
+        }
     }
-}
+
+    //función para agregar un juego de manera manual
+    async function agregarJuegoManual(nombre, anio, imagen){
+        const{data, error} = await supabase
+            .from('catalogo_games')
+            .insert([{nombre, anio, imagen}])
+            .select()
+            .single();
+
+        if(error){
+            console.log("Error creando juego en catálogo", error);
+            return;
+        }
+        await agregarJuegoCompleto(data);
+    }
 
     //función maestra para agregar juego completo
-    async function agregarJuegoCompleto(juego){
+    async function agregarJuegoCompleto(juego) {
         const nombreNormalizado = juego.nombre.toLowerCase().trim();
-        const yaExiste = listaJuegos.some(j=>j.nombre.toLowerCase().trim() === nombreNormalizado);
-        if(yaExiste){
+        const yaExiste = listaJuegos.some(j => j.nombre.toLowerCase().trim() === nombreNormalizado);
+        if (yaExiste) {
             mostrarMensaje("Este juego ya está en tu lista!");
             return false;
         }
 
         const nuevoJuego = {
-            nombre: juego.nombre,
-            anio: juego.anio,
-            imagen: juego.imagen,
+            ...juego,
             estado: "Pendiente"
         };
         //agregamos a la lista actual
         listaJuegos.push(nuevoJuego);
         guardarEnLocalStorage();
         //agregamos al catalogo de sugerencias
-        const enCatalogo = catalogoJuegos.some(j=>j.nombre.toLowerCase().trim() === nombreNormalizado);
-        if(!enCatalogo){
+        const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === nombreNormalizado);
+        if (!enCatalogo) {
             catalogoJuegos.push({
                 nombre: nuevoJuego.nombre,
                 anio: nuevoJuego.anio,
@@ -290,7 +315,7 @@ document.addEventListener('DOMContentLoaded', function () {
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalLogin'));
             modal.hide();//cierra el modal al ingresar
             mostrarMenuUsuario(data.user);
-            
+
             //limpiar listas antes de cargar
             listaJuegos.length = 0;
             catalogoJuegos.length = 0;
@@ -351,10 +376,8 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarMensajeModal("Completa todos los campos");
             return;
         }
-        const exito = await agregarJuegoCompleto({nombre, anio, imagen});
-        if(exito){
-            modalAgregarJuego.hide();
-        }
+        await agregarJuegoManual(nombre, anio, imagen);
+        modalAgregarJuego.hide();
     });
 
 
@@ -438,27 +461,32 @@ document.addEventListener('DOMContentLoaded', function () {
 
     async function cargarCatalogo() {
         try {
-            const respuesta = await fetch('data/catalogo.json');
-            const catalogoBase = await respuesta.json();
+            const { data, error } = await supabase
+                .from('catalogo_games')
+                .select('*');
 
-            console.log(catalogoJuegos);
-            catalogoJuegos = [...catalogoBase];
-            console.log("Catálogo cargado:", catalogoJuegos.length, "juegos");
+            if (error) {
+                console.log("Error al cargar el catálogo:", error);
+                return;
+            }
+            catalogoJuegos = data;
+            console.log("Catálogo cargado:", catalogoJuegos);
         } catch (error) {
             console.log("Error al cargar el catálogo: ", error);
         }
     }
+
     async function init() {
         await cargarCatalogo();
         //carga instantanea
         const cache = localStorage.getItem("mis_juegos_cache");
-        if(cache){
+        if (cache) {
             listaJuegos.length = 0;
             listaJuegos.push(...JSON.parse(cache));
             mostrarLista();
         }
         const { data, error } = await supabase.auth.getUser();
-        if(error) return;
+        if (error) return;
         const user = data.user;
         if (user) {
             mostrarMenuUsuario(user);
@@ -531,12 +559,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
             //eventos
             btnEliminarJuego.addEventListener('click', async function () {
-                try{
-                    await eliminarJuegosDeDB(element.nombre);
-                    listaJuegos.splice(index,1);
+                try {
+                    await eliminarJuegosDeDB(element);
+                    listaJuegos.splice(index, 1);
                     mostrarLista();
                     guardarEnLocalStorage();
-                }catch(err){
+                } catch (err) {
                     alert("No se pudo eliminar el juego. Revisa tu conexión.");
                 }
             });
@@ -554,11 +582,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 mostrarLista();
                 guardarEnLocalStorage();
 
-                try{
+                try {
                     const error = await actualizarEstadoJuegoEnDB(element);
-                    if(error) throw error;
+                    if (error) throw error;
                     console.log("Estado sincronizado en DB");
-                }catch(err){
+                } catch (err) {
                     element.estado = estadoAnterior;
                     mostrarLista();
                     guardarEnLocalStorage();
@@ -583,7 +611,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .from('games')
             .update({ estado: juego.estado })
             .eq('user_id', userData.user.id)
-            .eq('nombre', juego.nombre);
+            .eq('catalogo_id', juego.id);
 
         if (error) console.log("error al actualizar estado:", error);
         return null;
