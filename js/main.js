@@ -34,8 +34,15 @@ document.addEventListener('DOMContentLoaded', function () {
     const collapse = document.getElementById("navbarSupportedContent");
     const supabaseUrl = "https://ecbqcrvoigykjpemgeps.supabase.co";
     const supabaseKey = "sb_publishable_mbXh1ZGw04vJfisrJlbKYQ_1LdzYvcH";
-
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+    const loadingMessage = document.getElementById("loadingMessage");
+
+    function mostrarLoading(){
+        loadingMessage.style.display = "block";
+    }
+    function ocultarLoading(){
+        loadingMessage.style.display = "none";
+    }
 
     //función para supabase
     async function guardarJuegoEnDB(juego) {
@@ -307,6 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //login
     btnLogin.addEventListener("click", async () => {
+        mostrarLoading();
         const { data, error } = await supabase.auth.signInWithPassword({
             email: loginEmail.value,
             password: loginPassword.value
@@ -482,6 +490,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     async function init() {
+        mostrarLoading();
         await cargarCatalogo();
 
         const { data } = await supabase.auth.getUser();
