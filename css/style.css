@@ -167,3 +167,9 @@ html{
     color: #66b2ff;
     text-shadow: 0 0 5px #0d6efd;
 }
+/*estilos texto del inicio*/
+.texto-inicio{
+    color: #ffffff;
+    text-shadow: 0 0 5px rgba(0, 0, 0, 0.8),
+                 0 0 10px rgba(0, 212, 255, 0.4);
+}
