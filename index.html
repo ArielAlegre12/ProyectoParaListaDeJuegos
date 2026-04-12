@@ -8,6 +8,7 @@
     <link rel="stylesheet" href="css/bootstrap/css/bootstrap.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
     <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/faqStyle.css">
     <link rel="icon" href="assets/img/favicon-16x16.png">
 </head>
 
@@ -76,22 +77,28 @@
             </div>
         </div>
         <section id="faqs">
-            <div class="mt-5 py-4 faq-container">
-                
-                <details class="faq-item">
-                    <summary>¿Cómo me registro?</summary>
-                    <p>Fácil, ingresas tu correo y pones una contraseña.</p>
-                </details>
+            <div class="faq-container">
 
-                <details class="faq-item">
-                    <summary>¿Cómo agrego un juego manualmente?</summary>
-                    <p>Inicia sesión o registrate, completá el formulario y listo.</p>
-                </details>
+                <div class="faq-item">
+                    <button class="faq-question">¿Cómo me registro?</button>
+                    <div class="faq-answer">
+                        <p>Fácil, ingresas tu correo y pones una contraseña.</p>
+                    </div>
+                </div>
 
-                <details class="faq-item">
-                    <summary>¿Se guardan mis datos?</summary>
-                    <p>Si, se guardan en tu usuario.</p>
-                </details>
+                <div class="faq-item">
+                    <button class="faq-question">¿Cómo agrego un juego manualmente?</button>
+                    <div class="faq-answer">
+                        <p>Inicia sesión o registrate, completá el formulario y listo.</p>
+                    </div>
+                </div>
+
+                <div class="faq-item">
+                    <button class="faq-question">¿Se guardan mis datos?</button>
+                    <div class="faq-answer">
+                        <p>Sí, se guardan en tu usuario.</p>
+                    </div>
+                </div>
             </div>
         </section>
     </main>
@@ -191,6 +198,7 @@
     </div>
     <script src="js/bootstrap/js/bootstrap.bundle.min.js"></script>
     <script src="js/main.js"></script>
+    <script src="js/faq.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
 </body>
 
