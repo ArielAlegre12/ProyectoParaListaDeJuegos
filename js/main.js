@@ -1,4 +1,4 @@
-import { buscarSteam } from "./steam.js";
+import { buscarSteam, obtenerDetallesSteam } from "./steam.js";
 document.addEventListener('DOMContentLoaded', function () {
     //seleciono el formulario
     const botonBuscador = document.querySelector('#miFormu');//id del boton
@@ -37,6 +37,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const supabaseKey = "sb_publishable_mbXh1ZGw04vJfisrJlbKYQ_1LdzYvcH";
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     const loadingMessage = document.getElementById("loadingMessage");
+    
 
     entradaJuego.addEventListener("input", async () => {
         const texto = entradaJuego.value.trim();
@@ -55,7 +56,11 @@ document.addEventListener('DOMContentLoaded', function () {
             div.classList.add("resultado");
 
             div.addEventListener("click", async () => {
-                const juegoDB = await obtenerOCrearJuegoDesdeSteam(juego);
+                const detalles = await obtenerDetallesSteam(juego.appid);
+
+                if (!detalles) return;
+
+                const juegoDB = await obtenerOCrearJuegoDesdeSteam(detalles);
 
                 if (!juegoDB) return;
 
@@ -69,32 +74,28 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    async function obtenerOCrearJuegoDesdeSteam(juegoSteam) {
-        // 1. buscar si ya existe
-        const { data: existente, error } = await supabase
+    async function obtenerOCrearJuegoDesdeSteam(juego) {
+        const { data: existente } = await supabase
             .from('catalogo_games')
             .select('*')
-            .eq('steam_id', juegoSteam.appid)
+            .eq('steam_id', juego.steam_id)
             .maybeSingle();
 
-        if (existente) {
-            return existente;
-        }
+        if (existente) return existente;
 
-        // 2. si no existe → crearlo
-        const { data: nuevo, error: errorInsert } = await supabase
+        const { data: nuevo, error } = await supabase
             .from('catalogo_games')
             .insert([{
-                steam_id: juegoSteam.appid,
-                nombre: juegoSteam.name,
-                anio: juegoSteam.release_date?.year || 0,
-                imagen: juegoSteam.header_image || "assets/img/default.png"
+                steam_id: juego.steam_id,
+                nombre: juego.nombre,
+                anio: juego.anio,
+                imagen: juego.imagen
             }])
             .select()
             .single();
 
-        if (errorInsert) {
-            console.log("Error creando juego:", errorInsert);
+        if (error) {
+            console.log("Error creando juego:", error);
             return null;
         }
 
