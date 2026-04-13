@@ -53,6 +53,7 @@ document.addEventListener('DOMContentLoaded', function () {
             resultadoBusqueda.innerHTML = "";
             return;
         }
+        mostrarSugerencias(texto);
 
         resultados.forEach(juego => {
             const div = document.createElement("div");
@@ -115,28 +116,87 @@ document.addEventListener('DOMContentLoaded', function () {
 
     //función para supabase
     async function guardarJuegoEnDB(juego) {
-        const { data: userData, error: userError } = await supabase.auth.getUser();
+        const { data: userData } = await supabase.auth.getUser();
 
-        if (userError || !userData.user) {
-            mostrarMensajeLogin("No hay usuario logueado");
+        // 🟡 SI NO HAY USER → LOCAL STORAGE GUEST
+        if (!userData?.user) {
+            const guest = JSON.parse(localStorage.getItem("guest_games") || "[]");
+
+            // evitar duplicados
+            const existe = guest.some(g => g.id === juego.id);
+            if (!existe) {
+                guest.push(juego);
+                localStorage.setItem("guest_games", JSON.stringify(guest));
+            }
+
             return;
         }
-        console.log("Juego a guardar:", juego);
-        const { data, error } = await supabase
-            .from('games')
+
+        // 🔵 SI HAY USER → SUPABASE
+        const { error } = await supabase
+            .from("games")
             .insert([{
                 catalogo_id: juego.id,
-                estado: juego.estado || "Pendiente",
+                estado: juego.estado,
                 user_id: userData.user.id
-            }])
-            .select();
+            }]);
 
         if (error) {
-            console.log("Error al guardar juego:", error);
-        } else {
-            console.log("Juego guardado en DB:", data);
+            console.log("Error DB:", error);
         }
     }
+    //migración de datos al login
+    async function migrarGuestASupabase(user) {
+        const guest = JSON.parse(localStorage.getItem("guest_games") || "[]");
+
+        if (!guest.length) return;
+
+        for (const juego of guest) {
+            await supabase.from("games").insert([{
+                catalogo_id: juego.id,
+                estado: juego.estado,
+                user_id: user.id
+            }]);
+        }
+
+        // 🧹 limpiar local
+        localStorage.removeItem("guest_games");
+
+        console.log("Migración completada 🚀");
+    }
+
+    function mostrarSugerencias(texto) {
+    resultadoBusqueda.innerHTML = "";
+
+    const coincidencias = catalogoJuegos
+        .filter(j =>
+            j.nombre.toLowerCase().includes(texto)
+        )
+        .slice(0, 8); // 🔥 límite pro
+
+    coincidencias.forEach(juego => {
+        const div = document.createElement("div");
+        div.textContent = juego.nombre;
+        div.classList.add("resultado");
+
+        div.addEventListener("click", async () => {
+            const detalles = await obtenerDetallesSteam(juego.steam_id);
+
+            if (!detalles) return;
+
+            const juegoDB = await obtenerOCrearJuegoDesdeSteam(detalles);
+
+            if (!juegoDB) return;
+
+            await agregarJuegoCompleto(juegoDB);
+
+            entradaJuego.value = "";
+            resultadoBusqueda.innerHTML = "";
+        });
+
+        resultadoBusqueda.appendChild(div);
+    });
+}
 
     //funcion sincronizar localmente
     function guardarEnLocalStorage() {
@@ -234,7 +294,11 @@ document.addEventListener('DOMContentLoaded', function () {
     //función maestra para agregar juego completo
     async function agregarJuegoCompleto(juego) {
         const nombreNormalizado = juego.nombre.toLowerCase().trim();
-        const yaExiste = listaJuegos.some(j => j.nombre.toLowerCase().trim() === nombreNormalizado);
+
+        const yaExiste = listaJuegos.some(
+            j => j.nombre.toLowerCase().trim() === nombreNormalizado
+        );
+
         if (yaExiste) {
             mostrarMensaje("Este juego ya está en tu lista!");
             return false;
@@ -244,22 +308,16 @@ document.addEventListener('DOMContentLoaded', function () {
             ...juego,
             estado: "Pendiente"
         };
-        //agregamos a la lista actual
+
+        // 🔥 SIEMPRE guardar local primero
         listaJuegos.push(nuevoJuego);
         guardarEnLocalStorage();
-        //agregamos al catalogo de sugerencias
-        const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === nombreNormalizado);
-        if (!enCatalogo) {
-            catalogoJuegos.push({
-                id: nuevoJuego.id,
-                nombre: nuevoJuego.nombre,
-                anio: nuevoJuego.anio,
-                imagen: nuevoJuego.imagen
-            });
-        }
 
         mostrarLista();
+
+        // 👇 luego intentar guardar en DB
         await guardarJuegoEnDB(nuevoJuego);
+
         return true;
     }
 
@@ -392,12 +450,15 @@ document.addEventListener('DOMContentLoaded', function () {
         if (error) {
             mostrarMensajeLogin(error.message);
         } else {
+            const user = data.user;
             mostrarMensajeLogin("Bienvenido!");
             console.log("usuario logueado: ", data.user);
             //acá se carga la lista de juegos del usuario
             const modal = bootstrap.Modal.getInstance(document.getElementById('modalLogin'));
             modal.hide();//cierra el modal al ingresar
             mostrarMenuUsuario(data.user);
+            await migrarGuestASupabase(user);
+
 
             //limpiar listas antes de cargar
             listaJuegos.length = 0;
