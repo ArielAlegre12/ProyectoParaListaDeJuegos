@@ -1,3 +1,4 @@
+import { buscarSteam } from "./steam.js";
 document.addEventListener('DOMContentLoaded', function () {
     //seleciono el formulario
     const botonBuscador = document.querySelector('#miFormu');//id del boton
@@ -37,10 +38,73 @@ document.addEventListener('DOMContentLoaded', function () {
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     const loadingMessage = document.getElementById("loadingMessage");
 
-    function mostrarLoading(){
+    entradaJuego.addEventListener("input", async () => {
+        const texto = entradaJuego.value.trim();
+
+        if (texto.length < 2) return;
+
+        const res = await buscarSteam(texto);
+
+        const resultados = res?.results || res?.data || [];
+
+        resultadoBusqueda.innerHTML = "";
+
+        resultados.forEach(juego => {
+            const div = document.createElement("div");
+            div.textContent = juego.name;
+            div.classList.add("resultado");
+
+            div.addEventListener("click", async () => {
+                const juegoDB = await obtenerOCrearJuegoDesdeSteam(juego);
+
+                if (!juegoDB) return;
+
+                await agregarJuegoCompleto(juegoDB);
+
+                entradaJuego.value = "";
+                resultadoBusqueda.innerHTML = "";
+            });
+
+            resultadoBusqueda.appendChild(div);
+        });
+    });
+
+    async function obtenerOCrearJuegoDesdeSteam(juegoSteam) {
+        // 1. buscar si ya existe
+        const { data: existente, error } = await supabase
+            .from('catalogo_games')
+            .select('*')
+            .eq('steam_id', juegoSteam.appid)
+            .maybeSingle();
+
+        if (existente) {
+            return existente;
+        }
+
+        // 2. si no existe → crearlo
+        const { data: nuevo, error: errorInsert } = await supabase
+            .from('catalogo_games')
+            .insert([{
+                steam_id: juegoSteam.appid,
+                nombre: juegoSteam.name,
+                anio: juegoSteam.release_date?.year || 0,
+                imagen: juegoSteam.header_image || "assets/img/default.png"
+            }])
+            .select()
+            .single();
+
+        if (errorInsert) {
+            console.log("Error creando juego:", errorInsert);
+            return null;
+        }
+
+        return nuevo;
+    }
+
+    function mostrarLoading() {
         loadingMessage.style.display = "block";
     }
-    function ocultarLoading(){
+    function ocultarLoading() {
         loadingMessage.style.display = "none";
     }
 
@@ -52,14 +116,15 @@ document.addEventListener('DOMContentLoaded', function () {
             mostrarMensajeLogin("No hay usuario logueado");
             return;
         }
-
+        console.log("Juego a guardar:", juego);
         const { data, error } = await supabase
             .from('games')
             .insert([{
                 catalogo_id: juego.id,
                 estado: juego.estado || "Pendiente",
                 user_id: userData.user.id
-            }]);
+            }])
+            .select();
 
         if (error) {
             console.log("Error al guardar juego:", error);
@@ -449,27 +514,27 @@ document.addEventListener('DOMContentLoaded', function () {
 
 
     //sugerencias de busqueda
-    entradaJuego.addEventListener('input', function () {
-        const texto = entradaJuego.value.trim().toLowerCase();
-        resultadoBusqueda.innerHTML = "";//para limpiar anteriores resultados.
-        indiceSeleccionado = -1;
+    //entradaJuego.addEventListener('input', function () {
+    //  const texto = entradaJuego.value.trim().toLowerCase();
+    // resultadoBusqueda.innerHTML = "";//para limpiar anteriores resultados.
+    //indiceSeleccionado = -1;
 
-        if (texto === "") return;//si no hay nada escrito, no mostramos sugerencias.
+    //if (texto === "") return;//si no hay nada escrito, no mostramos sugerencias.
 
-        const coincidencias = catalogoJuegos.filter(j => j.nombre.toLowerCase().includes(texto));
-        coincidencias.forEach(element => {
-            const divResultado = document.createElement("div");
-            divResultado.textContent = element.nombre;
-            divResultado.classList.add("resultado");
+    //const coincidencias = catalogoJuegos.filter(j => j.nombre.toLowerCase().includes(texto));
+    //coincidencias.forEach(element => {
+    //  const divResultado = document.createElement("div");
+    //divResultado.textContent = element.nombre;
+    //divResultado.classList.add("resultado");
 
-            divResultado.addEventListener('click', async function () {
-                await agregarJuegoCompleto(element);
-                entradaJuego.value = "";
-                resultadoBusqueda.innerHTML = "";
-            });
-            resultadoBusqueda.appendChild(divResultado);
-        });
-    });
+    // divResultado.addEventListener('click', async function () {
+    //   await agregarJuegoCompleto(element);
+    // entradaJuego.value = "";
+    //resultadoBusqueda.innerHTML = "";
+    // });
+    // resultadoBusqueda.appendChild(divResultado);
+    //});
+    //});
 
 
     async function cargarCatalogo() {
