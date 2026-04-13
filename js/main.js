@@ -37,18 +37,22 @@ document.addEventListener('DOMContentLoaded', function () {
     const supabaseKey = "sb_publishable_mbXh1ZGw04vJfisrJlbKYQ_1LdzYvcH";
     const supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
     const loadingMessage = document.getElementById("loadingMessage");
-    
+
 
     entradaJuego.addEventListener("input", async () => {
         const texto = entradaJuego.value.trim();
 
-        if (texto.length < 2) return;
+        if (texto.length < 2) {
+            resultadoBusqueda.innerHTML = "";
+        }
 
         const res = await buscarSteam(texto);
 
         const resultados = res?.results || res?.data || [];
-
-        resultadoBusqueda.innerHTML = "";
+        if (!resultados.length) {
+            resultadoBusqueda.innerHTML = "";
+            return;
+        }
 
         resultados.forEach(juego => {
             const div = document.createElement("div");
