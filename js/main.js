@@ -118,21 +118,20 @@ document.addEventListener('DOMContentLoaded', function () {
     async function guardarJuegoEnDB(juego) {
         const { data: userData } = await supabase.auth.getUser();
 
-        // 🟡 SI NO HAY USER → LOCAL STORAGE GUEST
+        //SI NO HAY USER → LOCAL STORAGE GUEST
         if (!userData?.user) {
             const guest = JSON.parse(localStorage.getItem("guest_games") || "[]");
 
-            // evitar duplicados
+            //evitar duplicados
             const existe = guest.some(g => g.id === juego.id);
             if (!existe) {
                 guest.push(juego);
                 localStorage.setItem("guest_games", JSON.stringify(guest));
             }
-
             return;
         }
 
-        // 🔵 SI HAY USER → SUPABASE
+        //SI HAY USER → SUPABASE
         const { error } = await supabase
             .from("games")
             .insert([{
@@ -140,7 +139,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 estado: juego.estado,
                 user_id: userData.user.id
             }]);
-
         if (error) {
             console.log("Error DB:", error);
         }
@@ -159,10 +157,9 @@ document.addEventListener('DOMContentLoaded', function () {
             }]);
         }
 
-        // 🧹 limpiar local
+        //limpiar local
         localStorage.removeItem("guest_games");
-
-        console.log("Migración completada 🚀");
+        console.log("Migración completada");
     }
 
     function mostrarSugerencias(texto) {
@@ -172,7 +169,7 @@ document.addEventListener('DOMContentLoaded', function () {
         .filter(j =>
             j.nombre.toLowerCase().includes(texto)
         )
-        .slice(0, 8); // 🔥 límite pro
+        .slice(0, 8);//límite
 
     coincidencias.forEach(juego => {
         const div = document.createElement("div");
@@ -259,7 +256,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 estado: juegoDB.estado || "Pendiente"
             });
 
-            // Agregar al catálogo de sugerencias si no está ya
+            //agregar al catálogo de sugerencias si no está ya
             const enCatalogo = catalogoJuegos.some(j => j.nombre.toLowerCase().trim() === juegoDB.catalogo_games.nombre.toLowerCase().trim());
             if (!enCatalogo) {
                 catalogoJuegos.push({
@@ -270,7 +267,6 @@ document.addEventListener('DOMContentLoaded', function () {
                 });
             }
         });
-
         mostrarLista();
         guardarEnLocalStorage();
 
@@ -309,13 +305,13 @@ document.addEventListener('DOMContentLoaded', function () {
             estado: "Pendiente"
         };
 
-        // 🔥 SIEMPRE guardar local primero
+        //SIEMPRE guardar local primero
         listaJuegos.push(nuevoJuego);
         guardarEnLocalStorage();
 
         mostrarLista();
 
-        // 👇 luego intentar guardar en DB
+        //luego intentar guardar en DB
         await guardarJuegoEnDB(nuevoJuego);
 
         return true;
@@ -577,31 +573,6 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
     }
-
-
-    //sugerencias de busqueda
-    //entradaJuego.addEventListener('input', function () {
-    //  const texto = entradaJuego.value.trim().toLowerCase();
-    // resultadoBusqueda.innerHTML = "";//para limpiar anteriores resultados.
-    //indiceSeleccionado = -1;
-
-    //if (texto === "") return;//si no hay nada escrito, no mostramos sugerencias.
-
-    //const coincidencias = catalogoJuegos.filter(j => j.nombre.toLowerCase().includes(texto));
-    //coincidencias.forEach(element => {
-    //  const divResultado = document.createElement("div");
-    //divResultado.textContent = element.nombre;
-    //divResultado.classList.add("resultado");
-
-    // divResultado.addEventListener('click', async function () {
-    //   await agregarJuegoCompleto(element);
-    // entradaJuego.value = "";
-    //resultadoBusqueda.innerHTML = "";
-    // });
-    // resultadoBusqueda.appendChild(divResultado);
-    //});
-    //});
-
 
     async function cargarCatalogo() {
         try {
